@@ -1,0 +1,3 @@
+-keep class com.graphene.antivirus.data.** { *; }
+-keepattributes Signature
+-keepattributes *Annotation*
