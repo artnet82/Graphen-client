@@ -21,11 +21,14 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
-        gradle-version: '8.7'        # ← версия под ваш AGP
-        cache-cleanup: 'on-success'  # ← исправляет deprecation warning
+        gradle-version: '8.7'          # версия Gradle под ваш AGP
+        cache-cleanup: 'on-success'    # исправляет Deprecation Warning
 
     - name: Build Debug APK
       run: gradle assembleDebug --no-daemon --stacktrace
