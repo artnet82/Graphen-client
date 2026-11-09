@@ -17,6 +17,8 @@ import java.net.InetAddress
 import java.nio.ByteBuffer
 import kotlin.concurrent.thread
 
+private const val REAL_DNS = "1.1.1.1"
+
 class GrapheneVpnService : VpnService() {
 
     private var tunFd: ParcelFileDescriptor? = null

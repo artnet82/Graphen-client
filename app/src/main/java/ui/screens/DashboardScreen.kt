@@ -25,7 +25,9 @@ fun DashboardScreen(
     vm: MainViewModel,
     onStartScan: () -> Unit,
     onOpenPermissions: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onOpenSyncSetup: () -> Unit = {},
+    onOpenSync: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
