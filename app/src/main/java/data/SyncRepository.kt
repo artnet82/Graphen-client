@@ -69,7 +69,7 @@ class SyncRepository(
             var sent = 0
             try {
                 val pending = api.getPendingRequests(deviceId)
-                for (req in pending.requests) {
+                for (req in pending.items) {
                     val file = files.find { it.relativePath == req.relativePath } ?: continue
                     if (uploadFile(file, req.requestId, deviceId)) sent++
                 }
