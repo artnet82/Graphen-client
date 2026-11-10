@@ -16,14 +16,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Классы ширины:
- *   Compact  — телефоны в портрете (< 600dp)
- *   Medium   — складные (600dp..840dp) и телефоны в ландшафте
- *   Expanded — планшеты (> 840dp)
- *
- * windowWidthSizeClass — это свойство класса WindowSizeClass
- * (объявлено в его конструкторе), НЕ extension property.
- * Поэтому никаких дополнительных импортов не требуется.
+ * windowWidthSizeClass — это СВОЙСТВО класса WindowSizeClass
+ * (объявлено в его primary конструкторе).
+ * Это НЕ extension property — импортировать его нельзя.
+ * Доступно напрямую через `this.windowWidthSizeClass`.
  */
 
 val WindowSizeClass.isCompact: Boolean
@@ -38,7 +34,6 @@ val WindowSizeClass.isExpanded: Boolean
 val WindowSizeClass.isWide: Boolean
     get() = !isCompact
 
-/** Горизонтальные/вертикальные отступы контента под каждый класс окна. */
 @Composable
 @ReadOnlyComposable
 fun WindowSizeClass.contentPadding(): PaddingValues = when {
@@ -47,7 +42,6 @@ fun WindowSizeClass.contentPadding(): PaddingValues = when {
     else       -> PaddingValues(horizontal = 20.dp, vertical = 20.dp)
 }
 
-/** Максимальная ширина контента: планшет не растягивает карточки на всю ширину. */
 @Composable
 @ReadOnlyComposable
 fun WindowSizeClass.contentMaxWidth(): Dp = when {
@@ -56,7 +50,6 @@ fun WindowSizeClass.contentMaxWidth(): Dp = when {
     else       -> Dp.Unspecified
 }
 
-/** Сколько колонок использовать в сетке карточек. */
 val WindowSizeClass.gridColumns: Int
     get() = when {
         isExpanded -> 3
@@ -64,10 +57,6 @@ val WindowSizeClass.gridColumns: Int
         else       -> 1
     }
 
-/**
- * Универсальный контейнер: отступы по классу ширины + центрирование с
- * ограничением максимальной ширины. Использовать на всех экранах.
- */
 @Composable
 fun AdaptiveContainer(
     windowSizeClass: WindowSizeClass,
