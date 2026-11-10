@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.windowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
@@ -21,7 +20,12 @@ import androidx.compose.ui.unit.dp
  *   Compact  — телефоны в портрете (< 600dp)
  *   Medium   — складные (600dp..840dp) и телефоны в ландшафте
  *   Expanded — планшеты (> 840dp)
+ *
+ * windowWidthSizeClass — это свойство класса WindowSizeClass
+ * (объявлено в его конструкторе), НЕ extension property.
+ * Поэтому никаких дополнительных импортов не требуется.
  */
+
 val WindowSizeClass.isCompact: Boolean
     get() = windowWidthSizeClass == WindowWidthSizeClass.Compact
 
