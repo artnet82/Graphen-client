@@ -1,6 +1,3 @@
-@file:OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@file:Suppress("DEPRECATION")   // подавляем warning про устаревший API
-
 package com.graphene.antivirus.ui.adaptive
 
 import androidx.compose.foundation.layout.Box
@@ -9,37 +6,50 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 // ============================================================
-//  Классы ширины:
-//    Compact  — телефоны в портрете (< 600dp)
-//    Medium   — складные (600dp..840dp), телефоны в ландшафте
-//    Expanded — планшеты (> 840dp)
+//  Breakpoints (Material3 guidelines):
+//    Compact  — < 600dp    — телефоны в портрете
+//    Medium   — 600..840dp — складные, телефоны в ландшафте
+//    Expanded — > 840dp    — планшеты
 //
-//  windowWidthSizeClass — свойство класса WindowSizeClass,
-//  объявлено в его конструкторе. Доступно напрямую.
+//  Реальная ширина берётся из LocalConfiguration.current.screenWidthDp —
+//  это стабильный API Compose foundation, а не experimental material3-
+//  window-size-class. WindowSizeClass используется только как токен
+//  в сигнатурах экранов, свойства этого класса мы не трогаем.
 // ============================================================
 
+private const val MEDIUM_BREAKPOINT_DP = 600
+private const val EXPANDED_BREAKPOINT_DP = 840
+
+@Composable
+@ReadOnlyComposable
+private fun currentWidthDp(): Int =
+    LocalConfiguration.current.screenWidthDp
+
 val WindowSizeClass.isCompact: Boolean
-    get() = windowWidthSizeClass == WindowWidthSizeClass.Compact
+    @Composable @ReadOnlyComposable get() =
+        currentWidthDp() < MEDIUM_BREAKPOINT_DP
 
 val WindowSizeClass.isMedium: Boolean
-    get() = windowWidthSizeClass == WindowWidthSizeClass.Medium
+    @Composable @ReadOnlyComposable get() =
+        currentWidthDp() in MEDIUM_BREAKPOINT_DP until EXPANDED_BREAKPOINT_DP
 
 val WindowSizeClass.isExpanded: Boolean
-    get() = windowWidthSizeClass == WindowWidthSizeClass.Expanded
+    @Composable @ReadOnlyComposable get() =
+        currentWidthDp() >= EXPANDED_BREAKPOINT_DP
 
 val WindowSizeClass.isWide: Boolean
-    get() = !isCompact
+    @Composable @ReadOnlyComposable get() =
+        currentWidthDp() >= MEDIUM_BREAKPOINT_DP
 
 @Composable
 @ReadOnlyComposable
@@ -58,7 +68,7 @@ fun WindowSizeClass.contentMaxWidth(): Dp = when {
 }
 
 val WindowSizeClass.gridColumns: Int
-    get() = when {
+    @Composable @ReadOnlyComposable get() = when {
         isExpanded -> 3
         isMedium   -> 2
         else       -> 1
