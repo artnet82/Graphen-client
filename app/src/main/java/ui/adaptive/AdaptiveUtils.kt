@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@file:Suppress("DEPRECATION")   // подавляем warning про устаревший API
 
 package com.graphene.antivirus.ui.adaptive
 
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
@@ -18,23 +20,23 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 // ============================================================
-//  Breakpoints по Material3 guidelines:
-//    Compact:  < 600dp    — телефоны в портрете
-//    Medium:   600..840dp — складные, телефоны в ландшафте
-//    Expanded: > 840dp    — планшеты
+//  Классы ширины:
+//    Compact  — телефоны в портрете (< 600dp)
+//    Medium   — складные (600dp..840dp), телефоны в ландшафте
+//    Expanded — планшеты (> 840dp)
+//
+//  windowWidthSizeClass — свойство класса WindowSizeClass,
+//  объявлено в его конструкторе. Доступно напрямую.
 // ============================================================
-private const val MEDIUM_BREAKPOINT_DP = 600
-private const val EXPANDED_BREAKPOINT_DP = 840
 
 val WindowSizeClass.isCompact: Boolean
-    get() = !isWidthAtLeastBreakpoint(MEDIUM_BREAKPOINT_DP)
+    get() = windowWidthSizeClass == WindowWidthSizeClass.Compact
 
 val WindowSizeClass.isMedium: Boolean
-    get() = isWidthAtLeastBreakpoint(MEDIUM_BREAKPOINT_DP) &&
-            !isWidthAtLeastBreakpoint(EXPANDED_BREAKPOINT_DP)
+    get() = windowWidthSizeClass == WindowWidthSizeClass.Medium
 
 val WindowSizeClass.isExpanded: Boolean
-    get() = isWidthAtLeastBreakpoint(EXPANDED_BREAKPOINT_DP)
+    get() = windowWidthSizeClass == WindowWidthSizeClass.Expanded
 
 val WindowSizeClass.isWide: Boolean
     get() = !isCompact
