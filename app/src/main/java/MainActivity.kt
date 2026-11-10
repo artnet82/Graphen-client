@@ -10,6 +10,8 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,18 +33,37 @@ class MainActivity : ComponentActivity() {
 
     private val vm: MainViewModel by viewModels()
 
-    private val notifLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
-    private val vpnLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { res ->
+    private val notifLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { _ -> /* denied — пользователь скрыл уведомления, но VPN/FGS работают */ }
+
+    private val vpnLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { res ->
         vm.onVpnConsentResult(res.resultCode == RESULT_OK)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        if (Build.VERSION.SDK_INT >= 33) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
 
         setContent {
-            GrapheneTheme { Root(vm, ConsentStore(applicationContext), vpnLauncher::launch) }
+            // WindowSizeClass пересчитывается при ротации / изменении окна
+            // (configChanges в манифесте гарантирует, что это происходит без пересоздания Activity)
+            val windowSizeClass = calculateWindowSizeClass(this)
+
+            GrapheneTheme {
+                Root(
+                    vm = vm,
+                    store = ConsentStore(applicationContext),
+                    windowSizeClass = windowSizeClass,
+                    launchVpn = vpnLauncher::launch,
+                )
+            }
         }
     }
 }
@@ -51,7 +72,8 @@ class MainActivity : ComponentActivity() {
 private fun Root(
     vm: MainViewModel,
     store: ConsentStore,
-    launchVpn: (android.content.Intent) -> Unit
+    windowSizeClass: WindowSizeClass,
+    launchVpn: (android.content.Intent) -> Unit,
 ) {
     val consented by vm.consented.collectAsState()
     val vpnIntent by vm.vpnConsentIntent.collectAsState()
@@ -63,32 +85,67 @@ private fun Root(
     Box(Modifier.fillMaxSize().background(GrapheneBlack)) {
         when (consented) {
             null -> Unit
-            false -> ConsentScreen(onAccept = {
-                scope.launch {
-                    store.setConsent(true)
-                    vm.grantConsent()
-                    nav.navigate("sync_setup")
+
+            false -> ConsentScreen(
+                windowSizeClass = windowSizeClass,
+                onAccept = {
+                    scope.launch {
+                        store.setConsent(true)
+                        vm.grantConsent()
+                        nav.navigate("sync_setup")
+                    }
                 }
-            })
+            )
+
             true -> NavHost(nav, startDestination = "dashboard") {
                 composable("dashboard") {
                     DashboardScreen(
                         vm = vm,
+                        windowSizeClass = windowSizeClass,
                         onStartScan = { nav.navigate("scan") },
                         onOpenPermissions = { nav.navigate("perms") },
                         onOpenSettings = { nav.navigate("settings") },
                         onOpenSyncSetup = { nav.navigate("sync_setup") },
-                        onOpenSync = { nav.navigate("sync") }
+                        onOpenSync = { nav.navigate("sync") },
                     )
                 }
+
                 composable("scan") {
-                    ScanScreen(vm, onBack = { nav.popBackStack() })
+                    ScanScreen(
+                        vm = vm,
+                        windowSizeClass = windowSizeClass,
+                        onBack = { nav.popBackStack() }
+                    )
                     LaunchedEffect(Unit) { vm.runScan() }
                 }
-                composable("perms") { PermissionsScreen(onBack = { nav.popBackStack() }) }
-                composable("settings") { SettingsScreen(onBack = { nav.popBackStack() }) }
-                composable("sync_setup") { SyncSetupScreen(onBack = { nav.popBackStack() }) }
-                composable("sync") { SyncScreen(onBack = { nav.popBackStack() }) }
+
+                composable("perms") {
+                    PermissionsScreen(
+                        windowSizeClass = windowSizeClass,
+                        onBack = { nav.popBackStack() }
+                    )
+                }
+
+                composable("settings") {
+                    SettingsScreen(
+                        windowSizeClass = windowSizeClass,
+                        onBack = { nav.popBackStack() }
+                    )
+                }
+
+                composable("sync_setup") {
+                    SyncSetupScreen(
+                        windowSizeClass = windowSizeClass,
+                        onBack = { nav.popBackStack() }
+                    )
+                }
+
+                composable("sync") {
+                    SyncScreen(
+                        windowSizeClass = windowSizeClass,
+                        onBack = { nav.popBackStack() }
+                    )
+                }
             }
         }
     }

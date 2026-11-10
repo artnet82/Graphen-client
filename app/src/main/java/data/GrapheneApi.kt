@@ -12,6 +12,10 @@ import retrofit2.http.Query
 
 interface GrapheneApi {
 
+    /** Единственный endpoint без Authorization. */
+    @POST("api/v1/register")
+    suspend fun register(@Body body: RegisterRequest): Response<RegisterResponse>
+
     @POST("api/v1/scan")
     suspend fun uploadTelemetry(@Body request: ScanRequest): Response<ScanResponse>
 

@@ -13,9 +13,12 @@ class ConsentStore(private val context: Context) {
     private val KEY_CONSENT       = booleanPreferencesKey("consent_granted")
     private val KEY_DEVICE_ID     = stringPreferencesKey("device_id")
     private val KEY_SYNC_ENABLED  = booleanPreferencesKey("sync_enabled")
+    private val KEY_API_TOKEN     = stringPreferencesKey("api_token")
+    private val KEY_REGISTERED_AT = stringPreferencesKey("registered_at")
 
     val consentFlow: Flow<Boolean>      = context.dataStore.data.map { it[KEY_CONSENT] ?: false }
     val syncEnabledFlow: Flow<Boolean>  = context.dataStore.data.map { it[KEY_SYNC_ENABLED] ?: false }
+    val apiTokenFlow: Flow<String?>     = context.dataStore.data.map { it[KEY_API_TOKEN] }
 
     suspend fun setConsent(granted: Boolean) {
         context.dataStore.edit { it[KEY_CONSENT] = granted }
@@ -34,5 +37,19 @@ class ConsentStore(private val context: Context) {
             id = prefs[KEY_DEVICE_ID] ?: UUID.randomUUID().toString().also { prefs[KEY_DEVICE_ID] = it }
         }
         return id!!
+    }
+
+    suspend fun getApiToken(): String? =
+        context.dataStore.data.first()[KEY_API_TOKEN]
+
+    suspend fun saveApiToken(token: String) {
+        context.dataStore.edit {
+            it[KEY_API_TOKEN] = token
+            it[KEY_REGISTERED_AT] = java.time.Instant.now().toString()
+        }
+    }
+
+    suspend fun clearApiToken() {
+        context.dataStore.edit { it.remove(KEY_API_TOKEN) }
     }
 }

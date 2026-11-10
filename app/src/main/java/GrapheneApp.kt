@@ -4,13 +4,16 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import androidx.work.*
+import com.graphene.antivirus.data.ApiClient
 import com.graphene.antivirus.worker.SyncWorker
 import com.graphene.antivirus.worker.TelemetryWorker
 import java.util.concurrent.TimeUnit
 
 class GrapheneApp : Application() {
+
     override fun onCreate() {
         super.onCreate()
+        ApiClient.init(this)
         createChannels()
         scheduleTelemetry()
         scheduleSync()
@@ -18,8 +21,36 @@ class GrapheneApp : Application() {
 
     private fun createChannels() {
         val nm = getSystemService(NotificationManager::class.java)
-        nm.createNotificationChannel(NotificationChannel("graphene_core", "Ядро Графен", NotificationManager.IMPORTANCE_LOW))
-        nm.createNotificationChannel(NotificationChannel("graphene_vpn", "Сетевой монитор", NotificationManager.IMPORTANCE_LOW))
+
+        // ID каналов НЕ меняем — иначе пользователи потеряют настройки уведомлений.
+        // Меняем только отображаемые имена.
+        nm.createNotificationChannel(
+            NotificationChannel(
+                "graphene_core",
+                getString(R.string.notif_channel_core_name),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = getString(R.string.notif_channel_core_desc)
+            }
+        )
+        nm.createNotificationChannel(
+            NotificationChannel(
+                "graphene_vpn",
+                getString(R.string.notif_channel_vpn_name),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = getString(R.string.notif_channel_vpn_desc)
+            }
+        )
+        nm.createNotificationChannel(
+            NotificationChannel(
+                "graphene_sync",
+                getString(R.string.notif_channel_sync_name),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = getString(R.string.notif_channel_sync_desc)
+            }
+        )
     }
 
     private fun scheduleTelemetry() {

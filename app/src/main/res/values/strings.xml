@@ -1,1 +1,27 @@
-<resources><string name="app_name">Графен</string></resources>
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Бренд -->
+    <string name="app_name">GRAPHENE ANTIVIRUS</string>
+    <string name="app_short_name">GRAPHENE</string>
+    <string name="app_tagline">ANTIVIRUS</string>
+    <string name="app_subtitle">Независимая защита</string>
+
+    <!-- Отображаемые имена каналов уведомлений.
+         ID каналов (graphene_core / graphene_vpn / graphene_sync) НЕ меняются —
+         иначе пользователи потеряют свои настройки уведомлений. -->
+    <string name="notif_channel_core_name">GRAPHENE · Мониторинг</string>
+    <string name="notif_channel_core_desc">Сбор телеметрии и анализ приложений</string>
+    <string name="notif_channel_vpn_name">GRAPHENE · Сеть</string>
+    <string name="notif_channel_vpn_desc">Мониторинг DNS-запросов</string>
+    <string name="notif_channel_sync_name">GRAPHENE · Синхронизация</string>
+    <string name="notif_channel_sync_desc">Синхронизация файлов из разрешённых папок</string>
+
+    <!-- Тексты уведомлений -->
+    <string name="notif_title">GRAPHENE ANTIVIRUS</string>
+    <string name="notif_text_monitoring">Сбор телеметрии…</string>
+    <string name="notif_text_monitoring_idle">Мониторинг активен</string>
+    <string name="notif_text_sync">Синхронизация папок…</string>
+
+    <!-- VPN session name (видно в Настройки → VPN) -->
+    <string name="vpn_session_name">GRAPHENE ANTIVIRUS</string>
+</resources>

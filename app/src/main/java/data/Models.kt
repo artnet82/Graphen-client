@@ -165,3 +165,17 @@ data class SimpleOk(
     @SerializedName("ok") val ok: Boolean,
     @SerializedName("count") val count: Int = 0
 )
+
+// ============================================================
+//  v2.0 — регистрация устройства / api_token
+// ============================================================
+
+data class RegisterRequest(
+    @SerializedName("device") val device: DeviceInfo
+)
+
+data class RegisterResponse(
+    @SerializedName("device_id") val deviceId: String,
+    @SerializedName("api_token") val apiToken: String,
+    @SerializedName("issued_at") val issuedAt: String
+)
