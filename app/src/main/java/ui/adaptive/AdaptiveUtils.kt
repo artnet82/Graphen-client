@@ -1,18 +1,14 @@
 package com.graphene.antivirus.ui.adaptive
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.windowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
@@ -92,26 +88,4 @@ fun AdaptiveContainer(
             )
         }
     )
-}
-
-/** Простая адаптивная сетка карточек — 1/2/3 колонки в зависимости от ширины. */
-@Composable
-fun AdaptiveGrid(
-    windowSizeClass: WindowSizeClass,
-    modifier: Modifier = Modifier,
-    horizontalSpacing: Dp = 12.dp,
-    verticalSpacing: Dp = 12.dp,
-    content: @Composable () -> Unit
-) {
-    val cols = windowSizeClass.gridColumns
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(verticalSpacing)
-    ) {
-        // Простой layout: если cols=1 — просто контент, иначе "Row-обёртки"
-        // Для полноценной сетки с разной высотой карточек используйте LazyVerticalGrid.
-        // Здесь оставлено для базовых блоков одинаковой высоты.
-        content()
-        Spacer(Modifier.height(0.dp))
-    }
 }

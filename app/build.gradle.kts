@@ -33,7 +33,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // buildConfigField("String", "SERVER_URL", "\"https://api.graphene.example.com/\"")
         }
     }
 
@@ -73,10 +72,8 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // ---------- Adaptive ----------
-    implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
-    implementation("androidx.compose.material3.adaptive:adaptive:1.0.0")
-    implementation("androidx.compose.material3.adaptive:adaptive-layout:1.0.0")
-    implementation("androidx.compose.material3.adaptive:adaptive-navigation:1.0.0")
+    // Версию даёт Compose BOM (1.3.0 — совместимо с material3 из BOM).
+    implementation("androidx.compose.material3:material3-window-size-class")
 
     // ---------- Activity / Lifecycle ----------
     implementation("androidx.activity:activity-compose:1.9.3")

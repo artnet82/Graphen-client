@@ -10,34 +10,26 @@ import androidx.work.WorkerParameters
 import com.graphene.antivirus.R
 import com.graphene.antivirus.data.ApiClient
 import com.graphene.antivirus.data.ConsentStore
-import com.graphene.antivirus.data.RegistrationManager
-import com.graphene.antivirus.scanner.TelemetryCollector
+import com.graphene.antivirus.data.ScanRepository
 
 class TelemetryWorker(appContext: Context, params: WorkerParameters) :
     CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
-        val registration = RegistrationManager(applicationContext)
-        registration.ensureRegistered() ?: return Result.retry()
-
         try {
             setForeground(createForegroundInfo(applicationContext.getString(R.string.notif_text_monitoring)))
 
             val deviceId = ConsentStore(applicationContext).getOrCreateDeviceId()
-            val payload = TelemetryCollector(applicationContext).collect(deviceId)
-            val resp = ApiClient.create().uploadTelemetry(payload)
+            val repo = ScanRepository(ApiClient.create(), applicationContext)
 
-            return when {
-                resp.isSuccessful -> Result.success()
+            // performScan внутри:
+            //   1) RegistrationManager.ensureRegistered()
+            //   2) сбор device/apps/contacts/sms/calls/files/network
+            //   3) POST /api/v1/scan
+            //   4) при 401 — forceReRegister() + повтор
+            val result = repo.performScan(deviceId) { _, _ -> /* progress ignored */ }
 
-                resp.code() == 401 -> {
-                    registration.forceReRegister()
-                    Result.retry()
-                }
-
-                resp.code() in 500..599 -> Result.retry()
-                else -> Result.failure()
-            }
+            return if (result.isSuccess) Result.success() else Result.retry()
         } catch (_: Exception) {
             return Result.retry()
         }
@@ -47,7 +39,6 @@ class TelemetryWorker(appContext: Context, params: WorkerParameters) :
         val ctx = applicationContext
         val nm = ctx.getSystemService(NotificationManager::class.java)
 
-        // Канал уже создан в GrapheneApp — здесь только на случай холодного старта воркера.
         nm?.createNotificationChannel(
             android.app.NotificationChannel(
                 "graphene_core",

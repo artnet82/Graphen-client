@@ -10,7 +10,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
 
     private val notifLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { _ -> /* denied — пользователь скрыл уведомления, но VPN/FGS работают */ }
+    ) { _ -> /* denied — VPN/FGS продолжают работать */ }
 
     private val vpnLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -43,6 +43,7 @@ class MainActivity : ComponentActivity() {
         vm.onVpnConsentResult(res.resultCode == RESULT_OK)
     }
 
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -52,8 +53,8 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            // WindowSizeClass пересчитывается при ротации / изменении окна
-            // (configChanges в манифесте гарантирует, что это происходит без пересоздания Activity)
+            // WindowSizeClass пересчитывается при ротации — configChanges в манифесте
+            // гарантирует, что это без пересоздания Activity.
             val windowSizeClass = calculateWindowSizeClass(this)
 
             GrapheneTheme {
@@ -72,7 +73,7 @@ class MainActivity : ComponentActivity() {
 private fun Root(
     vm: MainViewModel,
     store: ConsentStore,
-    windowSizeClass: WindowSizeClass,
+    windowSizeClass: androidx.compose.material3.windowsizeclass.WindowSizeClass,
     launchVpn: (android.content.Intent) -> Unit,
 ) {
     val consented by vm.consented.collectAsState()
